@@ -65,7 +65,7 @@ void ICM42688_Read_All(ICM42688_Data_t *data){
 void ICM42688_Calibrate(void){
 	ICM42688_Data_t temp_data;
 	float sumX = 0, sumY = 0, sumZ = 0;
-	int samples = 500;
+	int samples = 2000;
 
 	printf("Calibrating IMU.... Please do not move!\r\n");
 	for(int i = 0; i < samples; i++){

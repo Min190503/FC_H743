@@ -165,47 +165,36 @@ void StartTask_FlightControl(void *argument)
 	osDelay(500);
 	ICM42688_Init(&hspi4);
 	ICM42688_Calibrate();
+
+
+
+	extern float gyroX_offset, gyroY_offset, gyroZ_offset;
+	printf("Offsets: X=%.3f Y=%.3f Z=%.3f\r\n",
+	       gyroX_offset, gyroY_offset, gyroZ_offset);
+
 	Madgwick_Init(&madgwick, 0.1f);
 
 	uint32_t last_tick = osKernelGetTickCount();
-	const uint32_t loop_period = 10; // 10ms
+	const uint32_t loop_period = 10;
 	float dt = 0.01f;
   /* Infinite loop */
   for(;;)
   {
 	  ICM42688_Read_All(&imu_data);
 
-	          // 1. Chuyển Gyro sang Rad/s
-	          float gx_rad = imu_data.gyro_x * 0.0174533f;
-	          float gy_rad = imu_data.gyro_y * 0.0174533f;
-	          float gz_rad = imu_data.gyro_z * 0.0174533f;
-
-	          // 2. Nắn lại trục cho mạch Mamba (nếu chưa nắn trong icm42688.c)
-	          // Nếu bạn đã sửa trong hàm Read_All rồi thì xóa 6 dòng này và dùng biến imu_data gốc.
-	          float a_x = imu_data.acc_z;
-	          float a_y = imu_data.acc_y;
-	          float a_z = -imu_data.acc_x;
-
-	          float mgx = gz_rad;
-	          float mgy = gy_rad;
-	          float mgz = -gx_rad;
-
-	          // 3. Chạy Madgwick Filter
-	          Madgwick_Update(&madgwick,
-	                  mgx, mgy, mgz,
-	                  a_x, a_y, a_z,
+	  Madgwick_Update(&madgwick,
+	                  imu_data.gyro_x, imu_data.gyro_y, imu_data.gyro_z,
+	                  imu_data.acc_x,  imu_data.acc_y,  imu_data.acc_z,
 	                  dt);
 
-	          // 4. In kết quả
-	          printf("Roll: %5.1f | Pitch: %5.1f | Yaw: %5.1f\r\n",
-	                  madgwick.roll, madgwick.pitch, madgwick.yaw);
 
-	          // Đèn chớp báo hiệu vòng lặp đang chạy
-	          HAL_GPIO_TogglePin(LED_ORANGE_GPIO_Port, LED_ORANGE_Pin);
+	  printf("Roll:%5.1f Pitch:%5.1f Yaw:%5.1f\r\n",
+	             madgwick.roll, madgwick.pitch, madgwick.yaw);
 
-	          // 5. Cập nhật mốc thời gian và Delay (CỰC KỲ QUAN TRỌNG)
-	          last_tick += loop_period;
-	          osDelayUntil(last_tick);
+	  HAL_GPIO_TogglePin(LED_ORANGE_GPIO_Port, LED_ORANGE_Pin);
+
+	  last_tick += loop_period;
+	  osDelayUntil(last_tick);
   }
   /* USER CODE END StartTask_FlightControl */
 }
