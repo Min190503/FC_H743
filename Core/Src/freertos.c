@@ -29,6 +29,7 @@
 #include <stdio.h>
 extern SPI_HandleTypeDef hspi4;
 #include "madgwick_filter.h"
+#include "drv_rc.h"
 
 /* USER CODE END Includes */
 
@@ -188,8 +189,8 @@ void StartTask_FlightControl(void *argument)
 	                  dt);
 
 
-	  printf("Roll:%5.1f Pitch:%5.1f Yaw:%5.1f\r\n",
-	             madgwick.roll, madgwick.pitch, madgwick.yaw);
+//	  printf("Roll:%5.1f Pitch:%5.1f Yaw:%5.1f\r\n",
+//	             madgwick.roll, madgwick.pitch, madgwick.yaw);
 
 	  HAL_GPIO_TogglePin(LED_ORANGE_GPIO_Port, LED_ORANGE_Pin);
 
@@ -209,10 +210,19 @@ void StartTask_FlightControl(void *argument)
 void StartTask_RC(void *argument)
 {
   /* USER CODE BEGIN StartTask_RC */
+	DRV_RC_Init();
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    DRV_RC_ParseData();
+    DRV_RC_IsHealthy();
+
+    //debug
+    printf("RC T:%d R:%d P:%d Y:%d FS:%d\r\n",
+                   rc_data.throttle, rc_data.roll,
+                   rc_data.pitch, rc_data.yaw,
+                   rc_data.is_failsafe);
+    osDelay(20);
   }
   /* USER CODE END StartTask_RC */
 }
