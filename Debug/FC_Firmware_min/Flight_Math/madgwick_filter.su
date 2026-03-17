@@ -1,0 +1,2 @@
+../FC_Firmware_min/Flight_Math/madgwick_filter.c:4:6:Madgwick_Init	16	static
+../FC_Firmware_min/Flight_Math/madgwick_filter.c:12:6:Madgwick_Update	152	static

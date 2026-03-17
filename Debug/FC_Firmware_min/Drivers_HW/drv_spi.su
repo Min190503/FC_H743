@@ -1,0 +1,2 @@
+../FC_Firmware_min/Drivers_HW/drv_spi.c:3:9:SPI_Read_Register	40	static
+../FC_Firmware_min/Drivers_HW/drv_spi.c:17:6:SPI_Write_Register	32	static

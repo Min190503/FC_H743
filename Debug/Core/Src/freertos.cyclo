@@ -1,0 +1,4 @@
+../Core/Src/freertos.c:94:6:MX_FREERTOS_Init	1
+../Core/Src/freertos.c:142:6:StartTask_System	1
+../Core/Src/freertos.c:162:6:StartTask_FlightControl	1
+../Core/Src/freertos.c:220:6:StartTask_RC	1
