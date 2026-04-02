@@ -27,5 +27,19 @@ typedef struct {
 	float temperature;
 } ICM42688_Data_t;
 
+typedef struct {
+    float gyro_x_offset;
+    float gyro_y_offset;
+    float gyro_z_offset;
+    float acc_x_offset;
+    float acc_y_offset;
+    float acc_z_offset;
+} IMU_Calib_t;
+extern IMU_Calib_t imu_calib;
+
+uint8_t ICM42688_Init(SPI_HandleTypeDef *hspi);
+void 	ICM42688_Read_All(ICM42688_Data_t *data);
+void	ICM42688_Calibrate(void);
+
 
 #endif

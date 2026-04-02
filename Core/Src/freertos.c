@@ -30,6 +30,7 @@
 extern SPI_HandleTypeDef hspi4;
 #include "madgwick_filter.h"
 #include "drv_rc.h"
+#include "drv_motor.h"
 
 /* USER CODE END Includes */
 
@@ -64,7 +65,7 @@ const osThreadAttr_t Task_System_attributes = {
 osThreadId_t Task_FlightContHandle;
 const osThreadAttr_t Task_FlightCont_attributes = {
   .name = "Task_FlightCont",
-  .stack_size = 1024 * 4,
+  .stack_size = 2048 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
 /* Definitions for Task_RC_Update */
@@ -164,20 +165,21 @@ void StartTask_FlightControl(void *argument)
 {
   /* USER CODE BEGIN StartTask_FlightControl */
 	osDelay(500);
+
+	//Init IMU
 	ICM42688_Init(&hspi4);
 	ICM42688_Calibrate();
-
-
-
-	extern float gyroX_offset, gyroY_offset, gyroZ_offset;
-	printf("Offsets: X=%.3f Y=%.3f Z=%.3f\r\n",
-	       gyroX_offset, gyroY_offset, gyroZ_offset);
-
 	Madgwick_Init(&madgwick, 0.1f);
 
+
+	//Init Motor - ESC 3s arm
+	Motor_Init();
+
+
 	uint32_t last_tick = osKernelGetTickCount();
-	const uint32_t loop_period = 10;
-	float dt = 0.01f;
+	const uint32_t loop_period = 1;
+	float dt = 0.001f;
+
   /* Infinite loop */
   for(;;)
   {
@@ -218,10 +220,11 @@ void StartTask_RC(void *argument)
     DRV_RC_IsHealthy();
 
     //debug
-    printf("RC T:%d R:%d P:%d Y:%d FS:%d\r\n",
-                   rc_data.throttle, rc_data.roll,
-                   rc_data.pitch, rc_data.yaw,
-                   rc_data.is_failsafe);
+	printf("RC T:%d R:%d P:%d Y:%d A1:%d A2:%d FS:%d\r\n",
+		   rc_data.throttle, rc_data.roll,
+		   rc_data.pitch, rc_data.yaw,
+		   rc_data.aux1, rc_data.aux2,
+		   rc_data.is_failsafe);
     osDelay(20);
   }
   /* USER CODE END StartTask_RC */

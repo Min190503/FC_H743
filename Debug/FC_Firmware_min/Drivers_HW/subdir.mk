@@ -5,14 +5,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../FC_Firmware_min/Drivers_HW/drv_motor.c \
 ../FC_Firmware_min/Drivers_HW/drv_rc.c \
 ../FC_Firmware_min/Drivers_HW/drv_spi.c 
 
 C_DEPS += \
+./FC_Firmware_min/Drivers_HW/drv_motor.d \
 ./FC_Firmware_min/Drivers_HW/drv_rc.d \
 ./FC_Firmware_min/Drivers_HW/drv_spi.d 
 
 OBJS += \
+./FC_Firmware_min/Drivers_HW/drv_motor.o \
 ./FC_Firmware_min/Drivers_HW/drv_rc.o \
 ./FC_Firmware_min/Drivers_HW/drv_spi.o 
 
@@ -24,7 +27,7 @@ FC_Firmware_min/Drivers_HW/%.o FC_Firmware_min/Drivers_HW/%.su FC_Firmware_min/D
 clean: clean-FC_Firmware_min-2f-Drivers_HW
 
 clean-FC_Firmware_min-2f-Drivers_HW:
-	-$(RM) ./FC_Firmware_min/Drivers_HW/drv_rc.cyclo ./FC_Firmware_min/Drivers_HW/drv_rc.d ./FC_Firmware_min/Drivers_HW/drv_rc.o ./FC_Firmware_min/Drivers_HW/drv_rc.su ./FC_Firmware_min/Drivers_HW/drv_spi.cyclo ./FC_Firmware_min/Drivers_HW/drv_spi.d ./FC_Firmware_min/Drivers_HW/drv_spi.o ./FC_Firmware_min/Drivers_HW/drv_spi.su
+	-$(RM) ./FC_Firmware_min/Drivers_HW/drv_motor.cyclo ./FC_Firmware_min/Drivers_HW/drv_motor.d ./FC_Firmware_min/Drivers_HW/drv_motor.o ./FC_Firmware_min/Drivers_HW/drv_motor.su ./FC_Firmware_min/Drivers_HW/drv_rc.cyclo ./FC_Firmware_min/Drivers_HW/drv_rc.d ./FC_Firmware_min/Drivers_HW/drv_rc.o ./FC_Firmware_min/Drivers_HW/drv_rc.su ./FC_Firmware_min/Drivers_HW/drv_spi.cyclo ./FC_Firmware_min/Drivers_HW/drv_spi.d ./FC_Firmware_min/Drivers_HW/drv_spi.o ./FC_Firmware_min/Drivers_HW/drv_spi.su
 
 .PHONY: clean-FC_Firmware_min-2f-Drivers_HW
 

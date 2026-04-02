@@ -4,23 +4,36 @@
 #include <stdio.h>
 
 static SPI_HandleTypeDef *imu_spi;
-float gyroX_offset = 0, gyroY_offset = 0, gyroZ_offset = 0;
+IMU_Calib_t imu_calib =  {0};
+
 
 uint8_t ICM42688_Init(SPI_HandleTypeDef *hspi){
     imu_spi = hspi;
 
     HAL_GPIO_WritePin(ICM42688_CS_PORT, ICM42688_CS_PIN, GPIO_PIN_SET);
-    HAL_Delay(100);
+    osDelay(100);
 
 
     SPI_Write_Register(imu_spi, ICM42688_CS_PORT, ICM42688_CS_PIN, 0x76, 0x00);
-    HAL_Delay(10);
+    osDelay(10);
 
     // 2. Đọc thử ID
     uint8_t who_am_i = SPI_Read_Register(imu_spi, ICM42688_CS_PORT, ICM42688_CS_PIN, 0x75);
 
     if(who_am_i == 0x47){
-        SPI_Write_Register(imu_spi, ICM42688_CS_PORT, ICM42688_CS_PIN, 0x4E, 0x0F);
+    	//DLPF
+    	//Bat Gyro + Accel Low Noise mode
+    	SPI_Write_Register(imu_spi, ICM42688_CS_PORT, ICM42688_CS_PIN, 0x4E, 0x0F);
+
+    	//GYRO_CONFIGO: ODR 1kHz, 2000dps
+    	SPI_Write_Register(imu_spi, ICM42688_CS_PORT, ICM42688_CS_PIN, 0x4F, 0x06);
+
+    	//ACCEL_CONFIGO: ODR 1kHz, 16g
+    	SPI_Write_Register(imu_spi, ICM42688_CS_PORT, ICM42688_CS_PIN, 0x50, 0x06);
+
+    	//GYRO_ACCEL_CONFIGO: DLPE BW = 42Hz
+        SPI_Write_Register(imu_spi, ICM42688_CS_PORT, ICM42688_CS_PIN, 0x52, 0x44);
+
         osDelay(50);
         return 1; // SUCCESS
     } else {
@@ -51,37 +64,50 @@ void ICM42688_Read_All(ICM42688_Data_t *data){
 
 	// Chuyển đổi sang đơn vị vật lý (Giả định dải đo mặc định: Accel +-16g, Gyro +-2000dps)
 	// Công thức: Value = Raw / Sensitivity
-	data->acc_x = (float)data->acc_x_raw / 2048.0f;
-	data->acc_y = (float)data->acc_y_raw / 2048.0f;
-	data->acc_z = (float)data->acc_z_raw / 2048.0f;
-
-	data->gyro_x = ((float)data->gyro_x_raw / 16.4f) - gyroX_offset;
-	data->gyro_y = ((float)data->gyro_y_raw / 16.4f) - gyroY_offset;
-	data->gyro_z = ((float)data->gyro_z_raw / 16.4f) - gyroZ_offset;
+	data->gyro_x = (data->gyro_x_raw / 16.4f)   - imu_calib.gyro_x_offset;
+	data->gyro_y = (data->gyro_y_raw / 16.4f)   - imu_calib.gyro_y_offset;
+	data->gyro_z = (data->gyro_z_raw / 16.4f)   - imu_calib.gyro_z_offset;
+	data->acc_x  = (data->acc_x_raw  / 2048.0f) - imu_calib.acc_x_offset;
+	data->acc_y  = (data->acc_y_raw  / 2048.0f) - imu_calib.acc_y_offset;
+	data->acc_z  = (data->acc_z_raw  / 2048.0f) - imu_calib.acc_z_offset;
 
 }
 
 
 void ICM42688_Calibrate(void){
-	ICM42688_Data_t temp_data;
-	float sumX = 0, sumY = 0, sumZ = 0;
+	ICM42688_Data_t temp;
+	float gx = 0, gy = 0, gz = 0;
+	float ax = 0, ay = 0, az = 0;
 	int samples = 2000;
 
-	printf("Calibrating IMU.... Please do not move!\r\n");
+	printf("Calibrating...Do not move!\r\n");
 	for(int i = 0; i < samples; i++){
-		ICM42688_Read_All(&temp_data);
-		sumX += temp_data.gyro_x;
-		sumY += temp_data.gyro_y;
-		sumZ += temp_data.gyro_z;
+		ICM42688_Read_All(&temp);
+		gx += temp.gyro_x_raw / 16.4f;
+		gy += temp.gyro_y_raw / 16.4f;
+		gz += temp.gyro_z_raw / 16.4f;
+		ax += temp.acc_x_raw  / 2048.0f;
+		ay += temp.acc_y_raw  / 2048.0f;
+		az += temp.acc_z_raw  / 2048.0f;
 
-		osDelay(2);
+		osDelay(1);
 	}
 
-	//trung binh sai so
-	gyroX_offset = sumX / samples;
-	gyroY_offset = sumY / samples;
-	gyroZ_offset = sumZ / samples;
+	imu_calib.gyro_x_offset = gx / samples;
+	imu_calib.gyro_y_offset = gy / samples;
+	imu_calib.gyro_z_offset = gz / samples;
 
-	printf("Calibration Done!\r\n");
-	printf("Offsets -> X:%.2f, Y:%.2f, Z:%.2f\r\n",gyroX_offset, gyroY_offset, gyroZ_offset);
+	imu_calib.acc_x_offset = ax / samples;
+	imu_calib.acc_y_offset = ay / samples;
+	imu_calib.acc_z_offset = (az / samples) - 1.0f;
+
+	printf("Gyro offset: X=%.3f Y=%.3f Z=%.3f\r\n",
+	           imu_calib.gyro_x_offset,
+	           imu_calib.gyro_y_offset,
+	           imu_calib.gyro_z_offset);
+
+	printf("Acc  offset: X=%.3f Y=%.3f Z=%.3f\r\n",
+	           imu_calib.acc_x_offset,
+	           imu_calib.acc_y_offset,
+	           imu_calib.acc_z_offset);
 }

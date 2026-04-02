@@ -1,0 +1,4 @@
+../FC_Firmware_min/Drivers_HW/drv_motor.c:4:6:Motor_Init	8	static
+../FC_Firmware_min/Drivers_HW/drv_motor.c:17:6:Motor_SetPWM	16	static
+../FC_Firmware_min/Drivers_HW/drv_motor.c:39:6:Motor_SetAll	16	static
+../FC_Firmware_min/Drivers_HW/drv_motor.c:46:6:Motor_Stop	8	static
