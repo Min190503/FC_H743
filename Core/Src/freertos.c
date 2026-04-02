@@ -31,6 +31,8 @@ extern SPI_HandleTypeDef hspi4;
 #include "madgwick_filter.h"
 #include "drv_rc.h"
 #include "drv_motor.h"
+#include "flight_state.h"
+#include "mixer.h"
 
 /* USER CODE END Includes */
 
@@ -174,6 +176,9 @@ void StartTask_FlightControl(void *argument)
 
 	//Init Motor - ESC 3s arm
 	Motor_Init();
+	FlightState_Init();
+	Mixer_Init();
+	flight_status.is_calibrated = 1;
 
 
 	uint32_t last_tick = osKernelGetTickCount();
@@ -190,11 +195,30 @@ void StartTask_FlightControl(void *argument)
 	                  imu_data.acc_x,  imu_data.acc_y,  imu_data.acc_z,
 	                  dt);
 
+	  if(flight_status.state == STATE_ARMED){
+		  // Map RC (1000-2000) -> góc mục tiêu (-45 đến +45 độ)
+		  float roll_target 	= ((float)rc_data.roll 	- 1500.0f) / 500.0f * 45.0f;
+		  float pitch_target 	= ((float)rc_data.pitch - 1500.0f) / 500.0f * 45.0f;
+		  float yaw_target 		= ((float)rc_data.yaw 	- 1500.0f) / 500.0f * 180.0f;
 
-//	  printf("Roll:%5.1f Pitch:%5.1f Yaw:%5.1f\r\n",
-//	             madgwick.roll, madgwick.pitch, madgwick.yaw);
+		  MotorOutput_t motors = Mixer_Compute(
+				  	rc_data.throttle - 1000,
+					madgwick.roll, madgwick.pitch, imu_data.gyro_z,
+					roll_target, pitch_target, yaw_target,
+					dt);
+		  Motor_SetNormalized(motors.m1, motors.m2, motors.m3, motors.m4);
+	  } else {
+		  Motor_Stop();
+		  PID_Reset(&pid_roll);
+		  PID_Reset(&pid_pitch);
+		  PID_Reset(&pid_yaw);
+	  }
 
-	  HAL_GPIO_TogglePin(LED_ORANGE_GPIO_Port, LED_ORANGE_Pin);
+	  static uint16_t led_counter = 0;
+	  if (++led_counter >= 500) {
+	      HAL_GPIO_TogglePin(LED_ORANGE_GPIO_Port, LED_ORANGE_Pin);
+	      led_counter = 0;
+	  }
 
 	  last_tick += loop_period;
 	  osDelayUntil(last_tick);
@@ -218,6 +242,7 @@ void StartTask_RC(void *argument)
   {
     DRV_RC_ParseData();
     DRV_RC_IsHealthy();
+    FlightState_Update();
 
     //debug
 	printf("RC T:%d R:%d P:%d Y:%d A1:%d A2:%d FS:%d\r\n",

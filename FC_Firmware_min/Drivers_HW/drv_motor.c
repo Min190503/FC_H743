@@ -35,6 +35,17 @@ void Motor_SetPWM(Motor_ID_t motor, uint16_t pwm_us){
 	}
 }
 
+static uint16_t map_normalized_to_pwm(uint16_t val){
+	if(val > 1000) val = 1000;
+	return MOTOR_PWM_MIN + val;
+}
+
+void Motor_SetNormalized(uint16_t m1, uint16_t m2, uint16_t m3, uint16_t m4){
+	Motor_SetPWM(MOTOR_1, map_normalized_to_pwm(m1));
+	Motor_SetPWM(MOTOR_2, map_normalized_to_pwm(m2));
+	Motor_SetPWM(MOTOR_3, map_normalized_to_pwm(m3));
+	Motor_SetPWM(MOTOR_4, map_normalized_to_pwm(m4));
+}
 
 void Motor_SetAll(uint16_t pwm_us){
 	Motor_SetPWM(MOTOR_1, pwm_us);

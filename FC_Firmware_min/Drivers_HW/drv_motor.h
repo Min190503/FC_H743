@@ -1,5 +1,5 @@
 #ifndef DRV_MOTOR_H_
-#define ERV_MOTOR_H_
+#define DRV_MOTOR_H_
 
 #include "main.h"
 #include "tim.h"
@@ -20,5 +20,7 @@ void Motor_Init(void);
 void Motor_SetPWM(Motor_ID_t motor, uint16_t pwm_us);
 void Motor_SetAll(uint16_t pwm_us);
 void Motor_Stop(void);
+
+void Motor_SetNormalized(uint16_t m1, uint16_t m2, uint16_t m3, uint16_t m4);
 
 #endif

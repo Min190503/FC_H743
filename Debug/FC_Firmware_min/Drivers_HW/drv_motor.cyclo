@@ -1,4 +1,6 @@
 ../FC_Firmware_min/Drivers_HW/drv_motor.c:4:6:Motor_Init	1
 ../FC_Firmware_min/Drivers_HW/drv_motor.c:17:6:Motor_SetPWM	7
-../FC_Firmware_min/Drivers_HW/drv_motor.c:39:6:Motor_SetAll	1
-../FC_Firmware_min/Drivers_HW/drv_motor.c:46:6:Motor_Stop	1
+../FC_Firmware_min/Drivers_HW/drv_motor.c:38:17:map_normalized_to_pwm	2
+../FC_Firmware_min/Drivers_HW/drv_motor.c:43:6:Motor_SetNormalized	1
+../FC_Firmware_min/Drivers_HW/drv_motor.c:50:6:Motor_SetAll	1
+../FC_Firmware_min/Drivers_HW/drv_motor.c:57:6:Motor_Stop	1

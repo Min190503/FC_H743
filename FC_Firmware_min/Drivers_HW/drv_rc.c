@@ -16,6 +16,8 @@ RC_Channel_t rc_data = {0};
 static uint32_t last_packet_time = 0;
 
 void DRV_RC_Init(void){
+	huart1.Instance->CR3 |= USART_CR3_OVRDIS;
+
 	//khoi dong DMA nhan lien tuc tren UART1
 	HAL_UART_Receive_DMA(&huart1, dma_buf, DMA_BUF_SIZE);
 }
@@ -24,6 +26,7 @@ void DRV_RC_Init(void){
 void DRV_RC_ParseData(void){
 	static uint16_t last_ndtr = DMA_BUF_SIZE;
 	uint16_t current_ndtr = __HAL_DMA_GET_COUNTER(huart1.hdmarx);
+
 	if(current_ndtr == last_ndtr){
 		return;
 	}
@@ -71,8 +74,8 @@ void DRV_RC_ParseData(void){
 		rc_data.is_failsafe = 0;
 		last_packet_time = osKernelGetTickCount();
 
-		dma_buf[i] = 0x00;
-		break;
+//		dma_buf[i] = 0x00;
+//		break;
 	}
 }
 
@@ -90,4 +93,18 @@ uint8_t DRV_RC_IsHealthy(void){
         return 0;
     }
     return 1;
+}
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
+    if(huart->Instance == USART1){
+        // Xoá toàn bộ cờ lỗi
+        __HAL_UART_CLEAR_OREFLAG(huart);
+        __HAL_UART_CLEAR_NEFLAG(huart);
+        __HAL_UART_CLEAR_FEFLAG(huart);
+
+        // Huỷ phiên DMA cũ đã chết
+        HAL_UART_DMAStop(huart);
+
+        // Khởi động lại DMA mới tinh
+        HAL_UART_Receive_DMA(huart, dma_buf, DMA_BUF_SIZE);
+    }
 }

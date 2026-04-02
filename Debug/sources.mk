@@ -45,6 +45,7 @@ Drivers/STM32H7xx_HAL_Driver/Src \
 FC_Firmware_min/Drivers_HW \
 FC_Firmware_min/Flight_Math \
 FC_Firmware_min/Sensors \
+FC_Firmware_min/System_App \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src \
 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \

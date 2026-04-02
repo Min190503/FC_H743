@@ -1,14 +1,7 @@
-Core/Src/freertos.o: ../Core/Src/freertos.c \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
- ../Core/Inc/FreeRTOSConfig.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
- ../Core/Inc/main.h ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
+FC_Firmware_min/System_App/flight_state.o: \
+ ../FC_Firmware_min/System_App/flight_state.c \
+ ../FC_Firmware_min/System_App/flight_state.h ../Core/Inc/main.h \
+ ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h \
@@ -45,26 +38,8 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Sensors/icm42688.h \
- /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_spi.h \
- /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/madgwick_filter.h \
- /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_rc.h \
- /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_motor.h \
- ../Core/Inc/tim.h ../Core/Inc/main.h \
- /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/System_App/flight_state.h \
- /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/mixer.h \
- /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/pid.h
-../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
-../Core/Inc/FreeRTOSConfig.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h:
-../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
+ /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_rc.h
+../FC_Firmware_min/System_App/flight_state.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -103,15 +78,4 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h:
-../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
-../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
-/home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Sensors/icm42688.h:
-/home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_spi.h:
-/home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/madgwick_filter.h:
 /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_rc.h:
-/home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_motor.h:
-../Core/Inc/tim.h:
-../Core/Inc/main.h:
-/home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/System_App/flight_state.h:
-/home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/mixer.h:
-/home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/pid.h:

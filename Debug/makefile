@@ -17,6 +17,7 @@ RM := rm -rf
 -include Middlewares/Third_Party/FreeRTOS/Source/subdir.mk
 -include Middlewares/ST/STM32_USB_Device_Library/Core/Src/subdir.mk
 -include Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/subdir.mk
+-include FC_Firmware_min/System_App/subdir.mk
 -include FC_Firmware_min/Sensors/subdir.mk
 -include FC_Firmware_min/Flight_Math/subdir.mk
 -include FC_Firmware_min/Drivers_HW/subdir.mk
