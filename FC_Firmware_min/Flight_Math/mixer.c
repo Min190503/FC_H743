@@ -43,16 +43,16 @@ MotorOutput_t Mixer_Compute(uint16_t throttle_rc,
 
 
 	//M1 sau phai CW
-	float m1 = throttle_rc - out_pitch - out_roll + out_yaw;
+	float m1 = throttle_rc + out_pitch - out_roll - out_yaw;
 
 	//M2 truoc phai  CCW
-	float m2 = throttle_rc + out_pitch - out_roll - out_yaw;
+	float m2 = throttle_rc - out_pitch - out_roll + out_yaw;
 
 	//M3 sau trai CCW
-	float m3 = throttle_rc - out_pitch + out_roll - out_yaw;
+	float m3 = throttle_rc + out_pitch + out_roll + out_yaw;
 
 	//M4 truoc trai  CW
-	float m4 = throttle_rc + out_pitch + out_roll + out_yaw;
+	float m4 = throttle_rc - out_pitch + out_roll - out_yaw;
 
 
 	//Goi han an toan

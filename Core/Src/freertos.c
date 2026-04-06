@@ -257,11 +257,16 @@ void StartTask_RC(void *argument)
     FlightState_Update();
 
     //debug
-	printf("RC T:%d R:%d P:%d Y:%d A1:%d A2:%d FS:%d\r\n",
-		   rc_data.throttle, rc_data.roll,
-		   rc_data.pitch, rc_data.yaw,
-		   rc_data.aux1, rc_data.aux2,
-		   rc_data.is_failsafe);
+//	printf("RC T:%d R:%d P:%d Y:%d A1:%d A2:%d FS:%d\r\n",
+//		   rc_data.throttle, rc_data.roll,
+//		   rc_data.pitch, rc_data.yaw,
+//		   rc_data.aux1, rc_data.aux2,
+//		   rc_data.is_failsafe);
+
+	printf("IMU -> Roll: %d | Pitch: %d | Gyro_Z: %d \r\n",
+	           (int)madgwick.roll,
+	           (int)madgwick.pitch,
+	           (int)imu_data.gyro_z);
     osDelay(20);
   }
   /* USER CODE END StartTask_RC */
