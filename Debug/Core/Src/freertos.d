@@ -52,7 +52,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/madgwick_filter.h \
  /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_rc.h \
  /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_motor.h \
- ../Core/Inc/tim.h ../Core/Inc/main.h \
+ ../Core/Inc/tim.h ../Core/Inc/main.h ../Core/Inc/dma.h \
  /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/System_App/flight_state.h \
  /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/mixer.h \
  /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/pid.h
@@ -112,6 +112,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Drivers_HW/drv_motor.h:
 ../Core/Inc/tim.h:
 ../Core/Inc/main.h:
+../Core/Inc/dma.h:
 /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/System_App/flight_state.h:
 /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/mixer.h:
 /home/min/FC_mamab_4_H743_V2/FC_mamba/FC_Firmware_min/Flight_Math/pid.h:

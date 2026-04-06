@@ -43,12 +43,12 @@ uint8_t ICM42688_Init(SPI_HandleTypeDef *hspi){
 
 
 void ICM42688_Read_All(ICM42688_Data_t *data){
-	uint8_t raw_buf[12];
+	uint8_t raw_buf[14];
 	uint8_t reg = 0x1F | 0x80;		//thanh ghi Accel_Data_x1 + Bit Read
 
 	HAL_GPIO_WritePin(ICM42688_CS_PORT, ICM42688_CS_PIN, GPIO_PIN_RESET);
 	HAL_SPI_Transmit(imu_spi, &reg, 1, 10);
-	HAL_SPI_Receive(imu_spi, raw_buf, 12, 10);
+	HAL_SPI_Receive(imu_spi, raw_buf, 14, 10);
 	HAL_GPIO_WritePin(ICM42688_CS_PORT, ICM42688_CS_PIN, GPIO_PIN_SET);
 
 
@@ -57,9 +57,11 @@ void ICM42688_Read_All(ICM42688_Data_t *data){
 	data->acc_y_raw = (int16_t)((raw_buf[2] << 8) | raw_buf[3]);
 	data->acc_z_raw = (int16_t)((raw_buf[4] << 8) | raw_buf[5]);
 
-	data->gyro_x_raw = (int16_t)((raw_buf[6] << 8) | raw_buf[7]);
-	data->gyro_y_raw = (int16_t)((raw_buf[8] << 8) | raw_buf[9]);
-	data->gyro_z_raw = (int16_t)((raw_buf[10] << 8) | raw_buf[11]);
+    // byte 6 và byte 7 là biến Nhiệt độ (TEMP_DATA) => bỏ qua
+
+	data->gyro_x_raw = (int16_t)((raw_buf[8] << 8) | raw_buf[9]);
+	data->gyro_y_raw = (int16_t)((raw_buf[10] << 8) | raw_buf[11]);
+	data->gyro_z_raw = (int16_t)((raw_buf[12] << 8) | raw_buf[13]);
 
 
 	// Chuyển đổi sang đơn vị vật lý (Giả định dải đo mặc định: Accel +-16g, Gyro +-2000dps)

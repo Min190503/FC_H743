@@ -3,10 +3,21 @@
 
 #include "main.h"
 #include "tim.h"
+#include "dma.h"
 
-#define MOTOR_PWM_MIN	1000
-#define MOTOR_PWM_MAX	2000
-#define MOTOR_PWM_STOP	1000
+//#define MOTOR_PWM_MIN	1000
+//#define MOTOR_PWM_MAX	2000
+//#define MOTOR_PWM_STOP	1000
+
+#define DSHOT_T1H		533			// 2/3 * 800 = bit 1
+#define DSHOT_T0H		267			// 1/3 * 800 = bit 0
+#define DSHOT_FRAME_LEN 16			// 16 bits per frame
+#define DSHOT_BUF_LEN 	17			// 16 bits + 1 reset (0)
+
+//Throttle range
+#define DSHOT_MIN_THROTTLE	48		//minimum armed value
+#define DSHOT_MAX_THROTTLE  2047	//maximum value
+#define DSHOT_DISARM_VALUE	0		//disarm
 
 
 typedef enum {

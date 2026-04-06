@@ -67,7 +67,7 @@ const osThreadAttr_t Task_System_attributes = {
 osThreadId_t Task_FlightContHandle;
 const osThreadAttr_t Task_FlightCont_attributes = {
   .name = "Task_FlightCont",
-  .stack_size = 2048 * 4,
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
 /* Definitions for Task_RC_Update */
@@ -206,7 +206,19 @@ void StartTask_FlightControl(void *argument)
 					madgwick.roll, madgwick.pitch, imu_data.gyro_z,
 					roll_target, pitch_target, yaw_target,
 					dt);
-		  Motor_SetNormalized(motors.m1, motors.m2, motors.m3, motors.m4);
+
+		  // Map từ dải output của Mixer (0-1000) sang dải DShot vòng tua (48 - 2047)
+		  // Cực kỳ chú ý: nếu dưới 48 là rơi vào lệnh đặc biệt của ESC (như kêu Beep)
+		  uint16_t dshot_m1 = 48 + (motors.m1 * 1999) / 1000;
+		  uint16_t dshot_m2 = 48 + (motors.m2 * 1999) / 1000;
+		  uint16_t dshot_m3 = 48 + (motors.m3 * 1999) / 1000;
+		  uint16_t dshot_m4 = 48 + (motors.m4 * 1999) / 1000;
+
+		  // Gửi lệnh xuống Motor
+		  Motor_SetDShot(MOTOR_1, dshot_m1);
+		  Motor_SetDShot(MOTOR_2, dshot_m2);
+		  Motor_SetDShot(MOTOR_3, dshot_m3);
+		  Motor_SetDShot(MOTOR_4, dshot_m4);
 	  } else {
 		  Motor_Stop();
 		  PID_Reset(&pid_roll);

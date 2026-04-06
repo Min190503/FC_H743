@@ -74,8 +74,8 @@ void DRV_RC_ParseData(void){
 		rc_data.is_failsafe = 0;
 		last_packet_time = osKernelGetTickCount();
 
-//		dma_buf[i] = 0x00;
-//		break;
+		dma_buf[i] = 0x00;
+		break;
 	}
 }
 

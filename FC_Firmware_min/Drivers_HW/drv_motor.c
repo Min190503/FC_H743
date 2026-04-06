@@ -1,59 +1,86 @@
 #include "drv_motor.h"
 #include "cmsis_os.h"
+#include <string.h>
 
-void Motor_Init(void){
-	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
-	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_3);
-	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
+__attribute__((section(".RAM_D2")))
+static uint32_t dshot_buf_m1[DSHOT_BUF_LEN];
 
-	__HAL_TIM_MOE_ENABLE(&htim8);
+__attribute__((section(".RAM_D2")))
+static uint32_t dshot_buf_m2[DSHOT_BUF_LEN];
 
-	Motor_Stop();
-	osDelay(3000);
+__attribute__((section(".RAM_D2")))
+static uint32_t dshot_buf_m3[DSHOT_BUF_LEN];
+
+__attribute__((section(".RAM_D2")))
+static uint32_t dshot_buf_m4[DSHOT_BUF_LEN];
+
+static void encode_dshot(uint32_t *buf, uint16_t value, uint8_t telemetry){
+	uint16_t packet = (value << 1) | (telemetry & 0x01);
+
+	//tinh CRC: XOR cua 3 nibble dau
+	uint16_t crc = (packet ^ (packet >> 4) ^ (packet >> 8)) & 0x0F;
+	packet = (packet << 4) | crc;
+
+	//Encode tung bit MSB truoc
+	for(int i = 0; i < DSHOT_FRAME_LEN; i++){
+		if(packet & (1 << (15 - i))){
+			buf[i] = DSHOT_T1H; 	// bit 1
+		} else {
+			buf[i] = DSHOT_T0H; 	// bit 0
+		}
+	}
+	buf[DSHOT_FRAME_LEN] = 0;		// reset pulse (LOW sau frame)
+}
+
+static void send_dshot_dma(TIM_HandleTypeDef *htim, uint32_t channel, uint32_t *buf){
+	HAL_TIM_PWM_Stop_DMA(htim, channel);
+	HAL_TIM_PWM_Start_DMA(htim, channel, buf, DSHOT_BUF_LEN);
 }
 
 
-void Motor_SetPWM(Motor_ID_t motor, uint16_t pwm_us){
-	if(pwm_us < MOTOR_PWM_MIN) pwm_us = MOTOR_PWM_MIN;
-	if(pwm_us > MOTOR_PWM_MAX) pwm_us = MOTOR_PWM_MAX;
+void Motor_Init(void){
+	__HAL_TIM_MOE_ENABLE(&htim8);
 
+	for(int i = 0; i < 1000; i++){
+		Motor_Stop();
+		osDelay(1);
+	}
+}
+
+
+
+void Motor_SetDShot(Motor_ID_t motor, uint16_t value){
+	//Clamp
+	if(value > DSHOT_MAX_THROTTLE) value = DSHOT_MAX_THROTTLE;
 
 	switch(motor){
 	case MOTOR_1:
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, pwm_us);
+		encode_dshot(dshot_buf_m1, value, 0);
+		send_dshot_dma(&htim3, TIM_CHANNEL_3, dshot_buf_m1);
 		break;
 	case MOTOR_2:
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, pwm_us);
+		encode_dshot(dshot_buf_m2, value, 0);
+		send_dshot_dma(&htim3, TIM_CHANNEL_4, dshot_buf_m2);
 		break;
 	case MOTOR_3:
-		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, pwm_us);
+		encode_dshot(dshot_buf_m3, value, 0);
+		send_dshot_dma(&htim8, TIM_CHANNEL_3, dshot_buf_m3);
 		break;
 	case MOTOR_4:
-		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_4, pwm_us);
+		encode_dshot(dshot_buf_m4, value, 0);
+		send_dshot_dma(&htim8, TIM_CHANNEL_4, dshot_buf_m4);
 		break;
 	}
 }
 
-static uint16_t map_normalized_to_pwm(uint16_t val){
-	if(val > 1000) val = 1000;
-	return MOTOR_PWM_MIN + val;
-}
 
-void Motor_SetNormalized(uint16_t m1, uint16_t m2, uint16_t m3, uint16_t m4){
-	Motor_SetPWM(MOTOR_1, map_normalized_to_pwm(m1));
-	Motor_SetPWM(MOTOR_2, map_normalized_to_pwm(m2));
-	Motor_SetPWM(MOTOR_3, map_normalized_to_pwm(m3));
-	Motor_SetPWM(MOTOR_4, map_normalized_to_pwm(m4));
-}
-
-void Motor_SetAll(uint16_t pwm_us){
-	Motor_SetPWM(MOTOR_1, pwm_us);
-	Motor_SetPWM(MOTOR_2, pwm_us);
-	Motor_SetPWM(MOTOR_3, pwm_us);
-	Motor_SetPWM(MOTOR_4, pwm_us);
+void Motor_SetAll(uint16_t value){
+	Motor_SetDShot(MOTOR_1, value);
+	Motor_SetDShot(MOTOR_2, value);
+	Motor_SetDShot(MOTOR_3, value);
+	Motor_SetDShot(MOTOR_4, value);
 }
 
 void Motor_Stop(void){
-	Motor_SetAll(MOTOR_PWM_STOP);
+	Motor_SetAll(DSHOT_DISARM_VALUE);
 }
