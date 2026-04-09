@@ -201,14 +201,29 @@ void StartTask_FlightControl(void *argument)
 		  float pitch_target 	= ((float)rc_data.pitch - 1500.0f) / 500.0f * 45.0f;
 		  float yaw_target 		= ((float)rc_data.yaw 	- 1500.0f) / 500.0f * 180.0f;
 
+		  //Throttle expo
+		  float t = (float)(rc_data.throttle - 1000) / 1000.0f;
+		  if (t < 0.0f) t = 0.0f;
+		  if (t > 1.0f) t = 1.0f;
+
+		  float t_expo = t * t;
+		  uint16_t throttle_final = (uint16_t)(t_expo * 1000.0f);
+
+		  if (rc_data.throttle < 1010) {
+		      throttle_final = 0;
+		  } else if (throttle_final < 60) {
+		      throttle_final = 60;
+		  }
+
+
 		  MotorOutput_t motors = Mixer_Compute(
-				  	rc_data.throttle - 1000,
-					madgwick.roll, madgwick.pitch, imu_data.gyro_z,
+				  	throttle_final,
+					madgwick.roll, madgwick.pitch,
+					imu_data.gyro_x, imu_data.gyro_y, imu_data.gyro_z,
 					roll_target, pitch_target, yaw_target,
 					dt);
 
 		  // Map từ dải output của Mixer (0-1000) sang dải DShot vòng tua (48 - 2047)
-		  // Cực kỳ chú ý: nếu dưới 48 là rơi vào lệnh đặc biệt của ESC (như kêu Beep)
 		  uint16_t dshot_m1 = 48 + (motors.m1 * 1999) / 1000;
 		  uint16_t dshot_m2 = 48 + (motors.m2 * 1999) / 1000;
 		  uint16_t dshot_m3 = 48 + (motors.m3 * 1999) / 1000;
@@ -224,6 +239,8 @@ void StartTask_FlightControl(void *argument)
 		  PID_Reset(&pid_roll);
 		  PID_Reset(&pid_pitch);
 		  PID_Reset(&pid_yaw);
+		  PID_Reset(&pid_angle_roll);
+		  PID_Reset(&pid_angle_pitch);
 	  }
 
 	  static uint16_t led_counter = 0;
@@ -257,16 +274,16 @@ void StartTask_RC(void *argument)
     FlightState_Update();
 
     //debug
-//	printf("RC T:%d R:%d P:%d Y:%d A1:%d A2:%d FS:%d\r\n",
-//		   rc_data.throttle, rc_data.roll,
-//		   rc_data.pitch, rc_data.yaw,
-//		   rc_data.aux1, rc_data.aux2,
-//		   rc_data.is_failsafe);
+	printf("RC T:%d R:%d P:%d Y:%d A1:%d A2:%d FS:%d\r\n",
+		   rc_data.throttle, rc_data.roll,
+		   rc_data.pitch, rc_data.yaw,
+		   rc_data.aux1, rc_data.aux2,
+		   rc_data.is_failsafe);
 
-	printf("IMU -> Roll: %d | Pitch: %d | Gyro_Z: %d \r\n",
-	           (int)madgwick.roll,
-	           (int)madgwick.pitch,
-	           (int)imu_data.gyro_z);
+//	printf("IMU -> Roll: %d | Pitch: %d | Gyro_Z: %d \r\n",
+//	           (int)madgwick.roll,
+//	           (int)madgwick.pitch,
+//	           (int)imu_data.gyro_z);
     osDelay(20);
   }
   /* USER CODE END StartTask_RC */
