@@ -1,3 +1,4 @@
 ../FC_Firmware_min/Sensors/icm42688.c:10:9:ICM42688_Init	2
-../FC_Firmware_min/Sensors/icm42688.c:45:6:ICM42688_Read_All	1
-../FC_Firmware_min/Sensors/icm42688.c:79:6:ICM42688_Calibrate	2
+../FC_Firmware_min/Sensors/icm42688.c:44:13:ICM42688_Read_Raw	1
+../FC_Firmware_min/Sensors/icm42688.c:68:6:ICM42688_Calibrate	2
+../FC_Firmware_min/Sensors/icm42688.c:110:6:ICM42688_Read_All	1

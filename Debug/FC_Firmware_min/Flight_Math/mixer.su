@@ -1,3 +1,3 @@
-../FC_Firmware_min/Flight_Math/mixer.c:7:14:constrain_float	24	static
-../FC_Firmware_min/Flight_Math/mixer.c:14:6:Mixer_Init	8	static
-../FC_Firmware_min/Flight_Math/mixer.c:25:15:Mixer_Compute	88	static
+../FC_Firmware_min/Flight_Math/mixer.c:12:14:constrain_float	24	static
+../FC_Firmware_min/Flight_Math/mixer.c:19:6:Mixer_Init	8	static
+../FC_Firmware_min/Flight_Math/mixer.c:36:15:Mixer_Compute	104	static

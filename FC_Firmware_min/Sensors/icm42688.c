@@ -41,10 +41,9 @@ uint8_t ICM42688_Init(SPI_HandleTypeDef *hspi){
     }
 }
 
-
-void ICM42688_Read_All(ICM42688_Data_t *data){
+static void ICM42688_Read_Raw(ICM42688_Data_t *data){
 	uint8_t raw_buf[14];
-	uint8_t reg = 0x1F | 0x80;		//thanh ghi Accel_Data_x1 + Bit Read
+	uint8_t reg = 0x1D | 0x80; //Thanh ghi TEMP_DATA1 + Bit Read
 
 	HAL_GPIO_WritePin(ICM42688_CS_PORT, ICM42688_CS_PIN, GPIO_PIN_RESET);
 	HAL_SPI_Transmit(imu_spi, &reg, 1, 10);
@@ -53,27 +52,17 @@ void ICM42688_Read_All(ICM42688_Data_t *data){
 
 
 	//ghep byte du lieu tho
-	data->acc_x_raw = (int16_t)((raw_buf[0] << 8) | raw_buf[1]);
-	data->acc_y_raw = (int16_t)((raw_buf[2] << 8) | raw_buf[3]);
-	data->acc_z_raw = (int16_t)((raw_buf[4] << 8) | raw_buf[5]);
+	data->acc_x_raw = (int16_t)((raw_buf[2] << 8) | raw_buf[3]);
+	data->acc_y_raw = (int16_t)((raw_buf[4] << 8) | raw_buf[5]);
+	data->acc_z_raw = (int16_t)((raw_buf[6] << 8) | raw_buf[7]);
 
-    // byte 6 và byte 7 là biến Nhiệt độ (TEMP_DATA) => bỏ qua
 
+	// byte 6 và byte 7 là biến Nhiệt độ (TEMP_DATA) => bỏ qua
 	data->gyro_x_raw = (int16_t)((raw_buf[8] << 8) | raw_buf[9]);
 	data->gyro_y_raw = (int16_t)((raw_buf[10] << 8) | raw_buf[11]);
 	data->gyro_z_raw = (int16_t)((raw_buf[12] << 8) | raw_buf[13]);
-
-
-	// Chuyển đổi sang đơn vị vật lý (Giả định dải đo mặc định: Accel +-16g, Gyro +-2000dps)
-	// Công thức: Value = Raw / Sensitivity
-	data->gyro_x = (data->gyro_x_raw / 16.4f)   - imu_calib.gyro_x_offset;
-	data->gyro_y = (data->gyro_y_raw / 16.4f)   - imu_calib.gyro_y_offset;
-	data->gyro_z = (data->gyro_z_raw / 16.4f)   - imu_calib.gyro_z_offset;
-	data->acc_x  = (data->acc_x_raw  / 2048.0f) - imu_calib.acc_x_offset;
-	data->acc_y  = (data->acc_y_raw  / 2048.0f) - imu_calib.acc_y_offset;
-	data->acc_z  = (data->acc_z_raw  / 2048.0f) - imu_calib.acc_z_offset;
-
 }
+
 
 
 void ICM42688_Calibrate(void){
@@ -84,10 +73,13 @@ void ICM42688_Calibrate(void){
 
 	printf("Calibrating...Do not move!\r\n");
 	for(int i = 0; i < samples; i++){
-		ICM42688_Read_All(&temp);
+		//Data Raw
+		ICM42688_Read_Raw(&temp);
+
 		gx += temp.gyro_x_raw / 16.4f;
 		gy += temp.gyro_y_raw / 16.4f;
 		gz += temp.gyro_z_raw / 16.4f;
+
 		ax += temp.acc_x_raw  / 2048.0f;
 		ay += temp.acc_y_raw  / 2048.0f;
 		az += temp.acc_z_raw  / 2048.0f;
@@ -113,3 +105,28 @@ void ICM42688_Calibrate(void){
 	           imu_calib.acc_y_offset,
 	           imu_calib.acc_z_offset);
 }
+
+
+void ICM42688_Read_All(ICM42688_Data_t *data){
+	ICM42688_Read_Raw(data);
+
+	float phys_gx = (data->gyro_x_raw / 16.4f)   - imu_calib.gyro_x_offset;
+	float phys_gy = (data->gyro_y_raw / 16.4f)   - imu_calib.gyro_y_offset;
+	float phys_gz = (data->gyro_z_raw / 16.4f)   - imu_calib.gyro_z_offset;
+
+	float phys_ax = (data->acc_x_raw  / 2048.0f) - imu_calib.acc_x_offset;
+	float phys_ay = (data->acc_y_raw  / 2048.0f) - imu_calib.acc_y_offset;
+	float phys_az = (data->acc_z_raw  / 2048.0f) - imu_calib.acc_z_offset;
+
+
+	data->gyro_x = -phys_gy;
+	data->gyro_y = phys_gx;
+	data->gyro_z = -phys_gz;
+
+	data->acc_x = -phys_ay;
+	data->acc_y = phys_ax;
+	data->acc_z = phys_az;
+
+
+}
+
