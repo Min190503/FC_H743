@@ -1,4 +1,5 @@
-../Core/Src/freertos.c:98:6:MX_FREERTOS_Init	1
-../Core/Src/freertos.c:146:6:StartTask_System	1
-../Core/Src/freertos.c:166:6:StartTask_FlightControl	7
-../Core/Src/freertos.c:265:6:StartTask_RC	1
+../Core/Src/freertos.c:105:6:MX_FREERTOS_Init	1
+../Core/Src/freertos.c:153:6:StartTask_System	4
+../Core/Src/freertos.c:190:6:StartTask_FlightControl	7
+../Core/Src/freertos.c:289:6:StartTask_RC	2
+../Core/Src/freertos.c:323:6:HAL_UART_RxCpltCallback	4

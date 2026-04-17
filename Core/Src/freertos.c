@@ -33,6 +33,13 @@ extern SPI_HandleTypeDef hspi4;
 #include "drv_motor.h"
 #include "flight_state.h"
 #include "mixer.h"
+#include <string.h>
+extern UART_HandleTypeDef huart1;
+
+uint8_t rx_byte;
+char rx_buffer[128];
+uint8_t rx_index = 0;
+uint8_t new_cmd_received = 0;
 
 /* USER CODE END Includes */
 
@@ -148,10 +155,27 @@ void StartTask_System(void *argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartTask_System */
+  HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
   /* Infinite loop */
   for(;;)
   {
-   osDelay(1);
+	  if (new_cmd_received == 1){
+		  if (strncmp(rx_buffer, "PID:", 4) == 0){
+			  float pR, iR, dR, pP, iP, dP, pY, iY, dY;
+
+			  // Chặt 9 con số từ chuỗi
+			  int parsed = sscanf(rx_buffer, "PID:%f,%f,%f,%f,%f,%f,%f,%f,%f",
+								&pR, &iR, &dR, &pP, &iP, &dP, &pY, &iY, &dY);
+			  // Nếu cắt đúng đủ 9 tham số thì mới cập nhật (Chống lỗi gửi thiếu)
+			  if (parsed == 9) {
+				  PID_Init(&pid_roll,  pR, iR, dR, 100.0f, 400.0f, 0.25f);
+				  PID_Init(&pid_pitch, pP, iP, dP, 100.0f, 400.0f, 0.25f);
+				  PID_Init(&pid_yaw,   pY, iY, dY, 100.0f, 400.0f, 0.0f);
+			  }
+		  }
+		  new_cmd_received = 0;
+	  }
+	  osDelay(10);
   }
   /* USER CODE END StartTask_System */
 }
@@ -206,7 +230,7 @@ void StartTask_FlightControl(void *argument)
 		  if (t < 0.0f) t = 0.0f;
 		  if (t > 1.0f) t = 1.0f;
 
-		  float t_expo = t * t;
+		  float t_expo = t;
 		  uint16_t throttle_final = (uint16_t)(t_expo * 1000.0f);
 
 		  if (rc_data.throttle < 1010) {
@@ -266,6 +290,7 @@ void StartTask_RC(void *argument)
 {
   /* USER CODE BEGIN StartTask_RC */
 	DRV_RC_Init();
+
   /* Infinite loop */
   for(;;)
   {
@@ -273,17 +298,21 @@ void StartTask_RC(void *argument)
     DRV_RC_IsHealthy();
     FlightState_Update();
 
-    //debug
-	printf("RC T:%d R:%d P:%d Y:%d A1:%d A2:%d FS:%d\r\n",
-		   rc_data.throttle, rc_data.roll,
-		   rc_data.pitch, rc_data.yaw,
-		   rc_data.aux1, rc_data.aux2,
-		   rc_data.is_failsafe);
+    float roll_target   = ((float)rc_data.roll  - 1500.0f) / 500.0f * 45.0f;
+    float pitch_target  = ((float)rc_data.pitch - 1500.0f) / 500.0f * 45.0f;
+    float yaw_target    = ((float)rc_data.yaw   - 1500.0f) / 500.0f * 180.0f;
+    float vbat_mock     = 13.4f;
 
-//	printf("IMU -> Roll: %d | Pitch: %d | Gyro_Z: %d \r\n",
-//	           (int)madgwick.roll,
-//	           (int)madgwick.pitch,
-//	           (int)imu_data.gyro_z);
+    static char tele_buf[128];
+	int tele_len = snprintf(tele_buf, sizeof(tele_buf), "DAT:%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n",
+														rc_data.throttle,
+														madgwick.roll, madgwick.pitch, madgwick.yaw,
+														roll_target, pitch_target, yaw_target,
+														vbat_mock);
+	if (tele_len > 0) {
+	        HAL_UART_Transmit_IT(&huart1, (uint8_t *)tele_buf, tele_len);
+	}
+
     osDelay(20);
   }
   /* USER CODE END StartTask_RC */
@@ -291,6 +320,24 @@ void StartTask_RC(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	if (huart->Instance == USART1) {
+	        // Nếu nhận được dấu xuống dòng -> Kết thúc câu lệnh
+	        if (rx_byte == '\n') {
+	            rx_buffer[rx_index] = '\0'; // Khóa chuỗi
+	            new_cmd_received = 1;       // Phất cờ báo cho Task_System biết
+	            rx_index = 0;               // Reset con trỏ cho câu lệnh tiếp theo
+	        }
+	        else {
+	            // Chống tràn bộ đệm
+	            if (rx_index < 127) {
+	                rx_buffer[rx_index++] = rx_byte;
+	            }
+	        }
+	        // Kích hoạt lại "đôi tai" ngắt để hứng ký tự tiếp theo
+	        HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
+	    }
+}
 
 /* USER CODE END Application */
 

@@ -24,13 +24,13 @@ void Mixer_Init(void){
 	// Ki = 0: Không tích phân, tránh windup
 
 	//Angle Loop - dung P
-	PID_Init(&pid_angle_roll,  4.5f, 0.0f, 0.0f, 0.0f, 300.0f, 0.0f);
-	PID_Init(&pid_angle_pitch, 4.5f, 0.0f, 0.0f, 0.0f, 300.0f, 0.0f);
+	PID_Init(&pid_angle_roll,  5.0f, 0.0f, 0.0f, 0.0f, 300.0f, 0.0f);
+	PID_Init(&pid_angle_pitch, 5.0f, 0.0f, 0.0f, 0.0f, 300.0f, 0.0f);
 
 	//Rate Loop _ P+I+D
-	PID_Init(&pid_roll,  0.8f, 0.0f, 0.003f, 100.0f, 400.0f, 0.25f);
-	PID_Init(&pid_pitch, 0.8f, 0.0f, 0.003f, 100.0f, 400.0f, 0.25f);
-	PID_Init(&pid_yaw,   2.0f, 0.3f, 0.0f,  100.0f, 400.0f, 0.0f);
+	PID_Init(&pid_roll,  2.0f, 0.30f, 0.005f, 100.0f, 400.0f, 0.25f);
+	PID_Init(&pid_pitch, 2.0f, 0.30f, 0.005f, 100.0f, 400.0f, 0.25f);
+	PID_Init(&pid_yaw,   3.0f, 0.4f,  0.0f,   100.0f, 400.0f, 0.0f);
 }
 
 MotorOutput_t Mixer_Compute(uint16_t throttle_rc,
@@ -40,8 +40,8 @@ MotorOutput_t Mixer_Compute(uint16_t throttle_rc,
 							float dt){
 	MotorOutput_t out = {0, 0, 0, 0};
 
-	//Nếu ga dưới 5%, tắt motor và RESET bộ tích phân (I) để rác không bị cộng dồn
-	if(throttle_rc < 10){
+	//Nếu ga dưới 100, tắt motor và RESET bộ tích phân (I) để rác không bị cộng dồn
+	if(throttle_rc < 100){
 		PID_Reset(&pid_angle_roll);
 		PID_Reset(&pid_angle_pitch);
 		PID_Reset(&pid_roll);
